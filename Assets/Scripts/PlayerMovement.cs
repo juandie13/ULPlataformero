@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField]
     private float runSpeed = 2f;
-
+    private float jumpSpeed = 5f; 
     private float moveDirection = 0f;
     private Rigidbody2D rb;
     private Animator animator;
@@ -44,6 +44,15 @@ public class PlayerMovement : MonoBehaviour
             runSpeed * moveDirection,
             rb.velocity.y
         );
+    }
+
+    private void OnJump(InputValue value)
+    {
+        if(value.isPressed)
+        {
+            //Saltar
+            rb.velocity += new Vector2(0f,jumpSpeed);
+        }
     }
     private void FlipSprite()
     {
