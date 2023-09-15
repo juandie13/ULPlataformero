@@ -8,15 +8,18 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField]
     private float runSpeed = 2f;
-    private float jumpSpeed = 5f; 
+    private float jumpSpeed = 10f; 
     private float moveDirection = 0f;
+    private bool isInTheAir = true;
     private Rigidbody2D rb;
     private Animator animator;
+    private CapsuleCollider2D capsuleCollider;
 
     private void Start() 
     {
         rb = GetComponent<Rigidbody2D>();   
         animator = GetComponent<Animator>();
+        capsuleCollider = GetComponent<CapsuleCollider2D>();
     }
 
     private void OnMove(InputValue value)
@@ -28,6 +31,11 @@ public class PlayerMovement : MonoBehaviour
     {
         Run();
         FlipSprite();
+        if(isInTheAir && Mathf.Abs(rb.velocity.y < Mathf.Epsilon))
+        {
+            //Estoy en el punto más alto del salto
+            rb.gravityScale = 2f;
+        }
     }
 
     private void Run()
@@ -50,8 +58,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if(value.isPressed)
         {
-            //Saltar
-            rb.velocity += new Vector2(0f,jumpSpeed);
+            if(capsuleCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
+            {
+                //Saltar
+                animator.SetBool("IsJumping",true);
+                rb.velocity += new Vector2(0f,jumpSpeed);
+                isInTheAir = true;
+            }
         }
     }
     private void FlipSprite()
@@ -65,6 +78,15 @@ public class PlayerMovement : MonoBehaviour
             );
         }
         
+    }
+
+    private void OnCollisionEnter2D(Collision2D other) {
+        if(other.transform.CompareTag("Platform"))
+        {
+            animator.SetBool("IsJumping",false);
+            isInTheAir = false;
+            rb.gravityScale = 1f;
+        }
     }
 
 }
